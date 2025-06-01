@@ -1,6 +1,8 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
+import requests
+
 
 # Get Snowflake session from Streamlit connection
 cnx = st.connection("snowflake", type="snowflake")
@@ -62,3 +64,7 @@ orders_df = (
 
 # Show recent orders
 st.dataframe(orders_df[["order_id", "Customer", "Smoothie", "order_time", "status"]])
+
+#New section to display smoothiefroot nutirtion information
+smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+st.text(smoothiefroot_response)
