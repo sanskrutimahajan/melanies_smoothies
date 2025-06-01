@@ -2,11 +2,9 @@
 import streamlit as st
 from snowflake.snowpark.functions import col
 
-# Get active Snowflake session
-session = get_active_session()
-
-cnx = st.connection("snowflake")
-session = cnx.session()
+# Get Snowflake session from Streamlit connection
+cnx = st.connection("snowflake", type="snowflake")
+session = cnx.session()  # ✅ CALL the function to get the session object
 
 # Title
 st.title("🥤 Smoothie Order Dashboard")
@@ -16,14 +14,14 @@ st.header("🧃 Place a Smoothie Order")
 
 # Load smoothies from Snowflake
 smoothies_df = session.table("smoothies.public.smoothies").to_pandas()
-smoothies_df.columns = smoothies_df.columns.str.lower()  # normalize columns
+smoothies_df.columns = smoothies_df.columns.str.lower()
 smoothie_options = smoothies_df["name"].tolist()
 
 selected_smoothie = st.selectbox("Choose your smoothie:", smoothie_options)
 
 # Load customers from Snowflake
 customer_df = session.table("smoothies.public.customers").to_pandas()
-customer_df.columns = customer_df.columns.str.lower()  # normalize columns
+customer_df.columns = customer_df.columns.str.lower()
 customer_options = customer_df["name"].tolist()
 
 selected_customer = st.selectbox("Select your name:", customer_options)
@@ -53,7 +51,7 @@ orders_df = (
     .limit(10)
     .to_pandas()
 )
-orders_df.columns = orders_df.columns.str.lower()  # normalize column names
+orders_df.columns = orders_df.columns.str.lower()
 
 # Merge smoothie and customer info
 orders_df = (
@@ -62,4 +60,5 @@ orders_df = (
     .merge(customer_df[["customer_id", "name"]].rename(columns={"name": "Customer"}), on="customer_id", how="left")
 )
 
+# Show recent orders
 st.dataframe(orders_df[["order_id", "Customer", "Smoothie", "order_time", "status"]])
